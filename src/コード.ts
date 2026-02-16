@@ -142,7 +142,7 @@ function doPost(e: any) {
     logError('doPost', error);
     return ContentService.createTextOutput(JSON.stringify({
       'status': 'error',
-      'message': error.toString()
+      'message': String(error)
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
@@ -249,7 +249,7 @@ function handleEvent(event: any) {
   } catch (error) {
     const userId = event.source ? event.source.userId : 'unknown';
     logError('handleEvent', error);
-    logStatus('PROCESS_ERROR', userId, { error: error.toString() });
+    logStatus('PROCESS_ERROR', userId, { error: String(error) });
     
     try {
       notifyUser(userId, 'エラーが発生しました。しばらく経ってから再度お試しください。');
@@ -375,7 +375,7 @@ function saveToNotion(data: any) {
     dsId = resolveDataSourceId();
     logStatus('NOTION_DATASOURCE_SUCCESS', 'system', { dataSourceId: dsId });
   } catch (e) {
-    logStatus('NOTION_DATASOURCE_DISCOVERY_FAILED', 'system', { error: e.toString() });
+    logStatus('NOTION_DATASOURCE_DISCOVERY_FAILED', 'system', { error: String(e) });
   }
 
   // 親の切り替え
@@ -430,7 +430,7 @@ function saveToNotion(data: any) {
     return { success: true, pageId: body.id };
   } catch (error) {
     logError('saveToNotion', error);
-    return { success: false, error: error.toString() };
+    return { success: false, error: String(error) };
   }
 }
 
@@ -600,7 +600,7 @@ function testNotionDatabaseConnection() {
     console.log(result);
     return result;
   } catch (error) {
-    const result = `❌ テスト失敗: ${error.toString()}`;
+    const result = `❌ テスト失敗: ${String(error)}`;
     console.error(result);
     return result;
   }
@@ -642,7 +642,7 @@ function testLineBotConnection() {
     }
   } catch (error) {
     logError('testLineBotConnection', error);
-    const result = `❌ エラー: ${error.toString()}`;
+    const result = `❌ エラー: ${String(error)}`;
     console.error(result);
     return result;
   }
