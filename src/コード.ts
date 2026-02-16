@@ -683,7 +683,7 @@ function setupScriptProperties() {
   
   for (const key in defaultProps) {
     if (!existingProps[key]) {
-      scriptProperties.setProperty(key, defaultProps[key]);
+      scriptProperties.setProperty(key, (defaultProps as Record<string, string>[key]));
     }
   }
   
