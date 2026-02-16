@@ -266,7 +266,7 @@ function getImageFromLine(messageId: any) {
   const url = `https://api-data.line.me/v2/bot/message/${messageId}/content`;
   
   const options = {
-    'method': 'get',
+    'method': 'get' as const,
     'headers': {
       'Authorization': 'Bearer ' + accessToken
     },
@@ -322,7 +322,7 @@ function analyzeReceiptWithGemini(base64Image: any) {
   };
   
   const options = {
-    'method': 'post',
+    'method': 'post' as const,
     'contentType': 'application/json',
     'payload': JSON.stringify(payload),
     'muteHttpExceptions': true
@@ -449,7 +449,7 @@ function replyToUser(replyToken: any, message: any) {
   };
   
   const options = {
-    'method': 'post',
+    'method': 'post' as const,
     'contentType': 'application/json',
     'headers': {
       'Authorization': 'Bearer ' + accessToken
@@ -481,7 +481,7 @@ function notifyUser(userId: any, message: any) {
   };
   
   const options = {
-    'method': 'post',
+    'method': 'post' as const,
     'contentType': 'application/json',
     'headers': {
       'Authorization': 'Bearer ' + accessToken
@@ -613,7 +613,7 @@ function testLineBotConnection() {
     const accessToken = getProp('LINE_ACCESS_TOKEN');
     const url = 'https://api.line.me/v2/bot/info';
     const options = {
-      'method': 'get',
+      'method': 'get' as const,
       'headers': {
         'Authorization': 'Bearer ' + accessToken
       },
