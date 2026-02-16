@@ -2,11 +2,11 @@
 
 // ===== ユーティリティ関数 =====
 
-function getProp(key) {
+function getProp(key: any) {
   return PropertiesService.getScriptProperties().getProperty(key);
 }
 
-function getNotionHeaders(useNew) {
+function getNotionHeaders(useNew: any) {
   return {
     'Authorization': 'Bearer ' + getProp('NOTION_API_KEY'),
     'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ function resolveDataSourceId() {
   return dsId;
 }
 
-function safeFetch(url, options, ctx) {
+function safeFetch(url: any, options: any, ctx: any) {
   const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true, ...options });
   const code = resp.getResponseCode();
   const text = resp.getContentText();
@@ -57,7 +57,7 @@ function safeFetch(url, options, ctx) {
   return { code, text, resp };
 }
 
-function formatDatabaseId(databaseId) {
+function formatDatabaseId(databaseId: any) {
   if (databaseId.includes('-')) {
     return databaseId;
   }
@@ -71,7 +71,7 @@ function formatDatabaseId(databaseId) {
 
 // ===== メイン処理関数 =====
 
-function doPost(e) {
+function doPost(e: any) {
   try {
     const requestInfo = {
       contentLength: e.postData ? e.postData.contents.length : 0,
@@ -100,7 +100,7 @@ function doPost(e) {
           const data = JSON.parse(e.postData.contents);
           
           if (data.events && data.events.length > 0) {
-            data.events.forEach(event => {
+            data.events.forEach(event: any => {
               try {
                 handleEvent(event);
               } catch (eventError) {
@@ -129,7 +129,7 @@ function doPost(e) {
     
     const data = JSON.parse(payload);
     if (data.events && data.events.length > 0) {
-      data.events.forEach(event => {
+      data.events.forEach(event: any => {
         handleEvent(event);
       });
     }
@@ -147,7 +147,7 @@ function doPost(e) {
   }
 }
 
-function validateSignature(payload, signature) {
+function validateSignature(payload: any, signature: any) {
   try {
     const channelSecret = getProp('LINE_CHANNEL_SECRET');
     
@@ -166,7 +166,7 @@ function validateSignature(payload, signature) {
   }
 }
 
-function handleEvent(event) {
+function handleEvent(event: any) {
   try {
     const userId = event.source ? event.source.userId : 'unknown';
     logStatus('PROCESSING_STARTED', userId, { eventType: event.type, messageType: event.message ? event.message.type : 'none' });
@@ -261,7 +261,7 @@ function handleEvent(event) {
 
 // ===== API連携関数 =====
 
-function getImageFromLine(messageId) {
+function getImageFromLine(messageId: any) {
   const accessToken = getProp('LINE_ACCESS_TOKEN');
   const url = `https://api-data.line.me/v2/bot/message/${messageId}/content`;
   
@@ -282,7 +282,7 @@ function getImageFromLine(messageId) {
   }
 }
 
-function analyzeReceiptWithGemini(base64Image) {
+function analyzeReceiptWithGemini(base64Image: any) {
   const geminiApiKey = getProp('GEMINI_API_KEY');
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`;
   
@@ -366,7 +366,7 @@ function analyzeReceiptWithGemini(base64Image) {
 
 // ===== Notion API関数（新版対応）=====
 
-function saveToNotion(data) {
+function saveToNotion(data: any) {
   const databaseId = getProp('NOTION_DATABASE_ID');
 
   // data_source_id を解決（失敗時はフォールバック）
@@ -436,7 +436,7 @@ function saveToNotion(data) {
 
 // ===== LINE API関数 =====
 
-function replyToUser(replyToken, message) {
+function replyToUser(replyToken: any, message: any) {
   const accessToken = getProp('LINE_ACCESS_TOKEN');
   const url = 'https://api.line.me/v2/bot/message/reply';
   
@@ -468,7 +468,7 @@ function replyToUser(replyToken, message) {
   }
 }
 
-function notifyUser(userId, message) {
+function notifyUser(userId: any, message: any) {
   const accessToken = getProp('LINE_ACCESS_TOKEN');
   const url = 'https://api.line.me/v2/bot/message/push';
   
@@ -502,7 +502,7 @@ function notifyUser(userId, message) {
 
 // ===== ヘルパー関数 =====
 
-function createResultMessage(analysisResult, notionResult) {
+function createResultMessage(analysisResult: any, notionResult: any) {
   if (!notionResult.success) {
     return `レシートの解析は完了しましたが、Notionへの保存に失敗しました。\n\n【解析結果】\n店名: ${analysisResult.storeName}\n金額: ${analysisResult.amount}円\n日付: ${analysisResult.date.replace(/-/g, '/')}\nジャンル: ${analysisResult.category}\n決済方法: ${analysisResult.paymentMethod}`;
   }
@@ -512,13 +512,13 @@ function createResultMessage(analysisResult, notionResult) {
 
 // ===== ログ・エラー処理 =====
 
-function logError(functionName, error) {
+function logError(functionName: any, error: any) {
   const errorMessage = `[ERROR in ${functionName}] ${error.toString()}`;
   const timestamp = new Date().toISOString();
   console.error(errorMessage);
 }
 
-function logStatus(stage, userId, details) {
+function logStatus(stage: any, userId: any, details: any) {
   const timestamp = new Date().toISOString();
   const statusMessage = `[STATUS] ${stage}: User=${userId}, Details=${JSON.stringify(details)}`;
   console.log(statusMessage);
@@ -536,7 +536,7 @@ function testNotionDatabaseConnection() {
 
     // 1) 旧API DB情報
     let dbName = '(unknown)';
-    let propList = [];
+    let propList: any[] = [];
     let oldStatus = '';
     try {
       const r = UrlFetchApp.fetch(`https://api.notion.com/v1/databases/${dbId}`, {
@@ -652,7 +652,7 @@ function getWebhookUrl() {
   return ScriptApp.getService().getUrl();
 }
 
-function doGet(e) {
+function doGet(e: any) {
   logStatus('SYSTEM_STARTUP', 'system', { 
     timestamp: new Date().toISOString(),
     deploymentId: ScriptApp.getScriptId(),
