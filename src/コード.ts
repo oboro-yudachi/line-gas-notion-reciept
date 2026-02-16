@@ -100,7 +100,7 @@ function doPost(e: any) {
           const data = JSON.parse(e.postData.contents);
           
           if (data.events && data.events.length > 0) {
-            data.events.forEach(event: any => {
+            data.events.forEach((event: any) => {
               try {
                 handleEvent(event);
               } catch (eventError) {
@@ -129,7 +129,7 @@ function doPost(e: any) {
     
     const data = JSON.parse(payload);
     if (data.events && data.events.length > 0) {
-      data.events.forEach(event: any => {
+      data.events.forEach((event: any) => {
         handleEvent(event);
       });
     }
