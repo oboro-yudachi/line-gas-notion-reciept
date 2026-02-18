@@ -11,7 +11,7 @@
     "typescript-language-server": "^5.1.3"
   },
   "scripts": {
-    "build": "npx tsc && cp src/appsscript.json dist/",
+    "build": "rollup -c && cp src/appsscript.json dist/",
     "push": "npm run build && clasp push",
     "check": "npx tsc --noEmit"
   }
