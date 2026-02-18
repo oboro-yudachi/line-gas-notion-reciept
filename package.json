@@ -2,5 +2,8 @@
   "devDependencies": {
     "@types/google-apps-script": "^2.0.8",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "typescript-language-server": "^5.1.3"
   }
 }
