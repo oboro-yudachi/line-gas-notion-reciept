@@ -2,7 +2,8 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "target": "ESNext",
-    "module": "None",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
     "types": ["google-apps-script"],
