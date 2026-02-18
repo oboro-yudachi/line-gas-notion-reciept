@@ -5,8 +5,8 @@
     "module": "None",
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
-    "types": ["google-apps-script"]
+    "types": ["google-apps-script"],
+    "outDir": "dist"
   },
   "include": ["src/**/*.ts"]
 }
