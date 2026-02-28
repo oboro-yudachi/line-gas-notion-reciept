@@ -2,11 +2,11 @@
 
 // ===== ユーティリティ関数 =====
 
-function getProp(key: any) {
+export function getProp(key: any) {
   return PropertiesService.getScriptProperties().getProperty(key);
 }
 
-function getNotionHeaders(useNew: any) {
+export function getNotionHeaders(useNew: any) {
   return {
     'Authorization': 'Bearer ' + getProp('NOTION_API_KEY'),
     'Content-Type': 'application/json',
@@ -14,14 +14,14 @@ function getNotionHeaders(useNew: any) {
   };
 }
 
-function validateEnv() {
+export function validateEnv() {
   const s = PropertiesService.getScriptProperties();
   const required = ['LINE_ACCESS_TOKEN','LINE_CHANNEL_SECRET','GEMINI_API_KEY','NOTION_API_KEY','NOTION_DATABASE_ID'];
   const missing = required.filter(k => !s.getProperty(k));
   if (missing.length) throw new Error('Missing properties: ' + missing.join(', '));
 }
 
-function resolveDataSourceId() {
+export function resolveDataSourceId() {
   const props = PropertiesService.getScriptProperties();
   const cached = props.getProperty('NOTION_DATA_SOURCE_ID');
   if (cached) return cached;
@@ -47,7 +47,7 @@ function resolveDataSourceId() {
   return dsId;
 }
 
-function safeFetch(url: any, options: any, ctx: any) {
+export function safeFetch(url: any, options: any, ctx: any) {
   const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true, ...options });
   const code = resp.getResponseCode();
   const text = resp.getContentText();
@@ -57,7 +57,7 @@ function safeFetch(url: any, options: any, ctx: any) {
   return { code, text, resp };
 }
 
-function formatDatabaseId(databaseId: any) {
+export function formatDatabaseId(databaseId: any) {
   if (databaseId.includes('-')) {
     return databaseId;
   }
@@ -71,7 +71,7 @@ function formatDatabaseId(databaseId: any) {
 
 // ===== メイン処理関数 =====
 
-function doPost(e: any) {
+export function doPost(e: any) {
   try {
     const requestInfo = {
       contentLength: e.postData ? e.postData.contents.length : 0,
@@ -147,7 +147,7 @@ function doPost(e: any) {
   }
 }
 
-function validateSignature(payload: any, signature: any) {
+export function validateSignature(payload: any, signature: any) {
   try {
     const channelSecret = getProp('LINE_CHANNEL_SECRET');
     
@@ -166,7 +166,7 @@ function validateSignature(payload: any, signature: any) {
   }
 }
 
-function handleEvent(event: any) {
+export function handleEvent(event: any) {
   try {
     const userId = event.source ? event.source.userId : 'unknown';
     logStatus('PROCESSING_STARTED', userId, { eventType: event.type, messageType: event.message ? event.message.type : 'none' });
@@ -261,7 +261,7 @@ function handleEvent(event: any) {
 
 // ===== API連携関数 =====
 
-function getImageFromLine(messageId: any) {
+export function getImageFromLine(messageId: any) {
   const accessToken = getProp('LINE_ACCESS_TOKEN');
   const url = `https://api-data.line.me/v2/bot/message/${messageId}/content`;
   
@@ -282,7 +282,7 @@ function getImageFromLine(messageId: any) {
   }
 }
 
-function analyzeReceiptWithGemini(base64Image: any) {
+export function analyzeReceiptWithGemini(base64Image: any) {
   const geminiApiKey = getProp('GEMINI_API_KEY');
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`;
   
@@ -366,7 +366,7 @@ function analyzeReceiptWithGemini(base64Image: any) {
 
 // ===== Notion API関数（新版対応）=====
 
-function saveToNotion(data: any) {
+export function saveToNotion(data: any) {
   const databaseId = getProp('NOTION_DATABASE_ID');
 
   // data_source_id を解決（失敗時はフォールバック）
@@ -436,7 +436,7 @@ function saveToNotion(data: any) {
 
 // ===== LINE API関数 =====
 
-function replyToUser(replyToken: any, message: any) {
+export function replyToUser(replyToken: any, message: any) {
   const accessToken = getProp('LINE_ACCESS_TOKEN');
   const url = 'https://api.line.me/v2/bot/message/reply';
   
@@ -468,7 +468,7 @@ function replyToUser(replyToken: any, message: any) {
   }
 }
 
-function notifyUser(userId: any, message: any) {
+export function notifyUser(userId: any, message: any) {
   const accessToken = getProp('LINE_ACCESS_TOKEN');
   const url = 'https://api.line.me/v2/bot/message/push';
   
@@ -502,7 +502,7 @@ function notifyUser(userId: any, message: any) {
 
 // ===== ヘルパー関数 =====
 
-function createResultMessage(analysisResult: any, notionResult: any) {
+export function createResultMessage(analysisResult: any, notionResult: any) {
   if (!notionResult.success) {
     return `レシートの解析は完了しましたが、Notionへの保存に失敗しました。\n\n【解析結果】\n店名: ${analysisResult.storeName}\n金額: ${analysisResult.amount}円\n日付: ${analysisResult.date.replace(/-/g, '/')}\nジャンル: ${analysisResult.category}\n決済方法: ${analysisResult.paymentMethod}`;
   }
@@ -512,13 +512,13 @@ function createResultMessage(analysisResult: any, notionResult: any) {
 
 // ===== ログ・エラー処理 =====
 
-function logError(functionName: any, error: any) {
+export function logError(functionName: any, error: any) {
   const errorMessage = `[ERROR in ${functionName}] ${error.toString()}`;
   const timestamp = new Date().toISOString();
   console.error(errorMessage);
 }
 
-function logStatus(stage: any, userId: any, details: any) {
+export function logStatus(stage: any, userId: any, details: any) {
   const timestamp = new Date().toISOString();
   const statusMessage = `[STATUS] ${stage}: User=${userId}, Details=${JSON.stringify(details)}`;
   console.log(statusMessage);
@@ -526,7 +526,7 @@ function logStatus(stage: any, userId: any, details: any) {
 
 // ===== テスト関数 =====
 
-function testNotionDatabaseConnection() {
+export function testNotionDatabaseConnection() {
   try {
     validateEnv();
     
@@ -606,7 +606,7 @@ function testNotionDatabaseConnection() {
   }
 }
 
-function testLineBotConnection() {
+export function testLineBotConnection() {
   try {
     validateEnv();
     
@@ -648,11 +648,11 @@ function testLineBotConnection() {
   }
 }
 
-function getWebhookUrl() {
+export function getWebhookUrl() {
   return ScriptApp.getService().getUrl();
 }
 
-function doGet(e: any) {
+export function doGet(e: any) {
   logStatus('SYSTEM_STARTUP', 'system', { 
     timestamp: new Date().toISOString(),
     deploymentId: ScriptApp.getScriptId(),
@@ -669,7 +669,7 @@ function doGet(e: any) {
   `);
 }
 
-function setupScriptProperties() {
+export function setupScriptProperties() {
   const scriptProperties = PropertiesService.getScriptProperties();
   const existingProps = scriptProperties.getProperties();
   
