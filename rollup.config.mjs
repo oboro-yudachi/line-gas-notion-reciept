@@ -6,6 +6,7 @@ export default {
   output: {
     dir: "dist",
     format: "esm",
+    name: 'GASApp'
   },
   plugins: [
     typescript(),
