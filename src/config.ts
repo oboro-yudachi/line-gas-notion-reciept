@@ -1,12 +1,21 @@
-// import { ScriptPropertyKey } from "./types";
+import { ScriptPropertyKey } from './types';
 
-function getProp(key: any) {
-  return PropertiesService.getScriptProperties().getProperty(key);
+export function getProp(key: ScriptPropertyKey): string {
+  return PropertiesService.getScriptProperties().getProperty(key) ?? '';
 }
 
-function validateEnv() {
-  const s = PropertiesService.getScriptProperties();
-  const required = ['LINE_ACCESS_TOKEN','LINE_CHANNEL_SECRET','GEMINI_API_KEY','NOTION_API_KEY','NOTION_DATABASE_ID'];
-  const missing = required.filter(k => !s.getProperty(k));
-  if (missing.length) throw new Error('Missing properties: ' + missing.join(', '));
+export function validateEnv(): void {
+  const required: ScriptPropertyKey[] = [
+    'LINE_ACCESS_TOKEN',
+    'LINE_CHANNEL_SECRET',
+    'GEMINI_API_KEY',
+    'NOTION_API_KEY',
+    'NOTION_DATABASE_ID',
+  ];
+
+  const missing = required.filter((key) => !getProp(key));
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required env: ${missing.join(', ')}`);
+  }
 }
