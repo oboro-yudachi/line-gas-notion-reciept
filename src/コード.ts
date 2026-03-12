@@ -36,15 +36,6 @@ export function resolveDataSourceId() {
   return dsId;
 }
 
-export function safeFetch(url: any, options: any, ctx: any) {
-  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true, ...options });
-  const code = resp.getResponseCode();
-  const text = resp.getContentText();
-  if (code < 200 || code >= 300) {
-    logError(ctx || 'safeFetch', `HTTP ${code}: ${text}`);
-  }
-  return { code, text, resp };
-}
 
 export function formatDatabaseId(databaseId: any) {
   if (databaseId.includes('-')) {
@@ -497,20 +488,6 @@ export function createResultMessage(analysisResult: any, notionResult: any) {
   }
   
   return `レシートの解析が完了しました！\n\n【解析結果】\n店名: ${analysisResult.storeName}\n金額: ${analysisResult.amount}円\n日付: ${analysisResult.date.replace(/-/g, '/')}\nジャンル: ${analysisResult.category}\n決済方法: ${analysisResult.paymentMethod}\n\n内容に誤りがある場合は、Notionで直接編集してください。`;
-}
-
-// ===== ログ・エラー処理 =====
-
-export function logError(functionName: any, error: any) {
-  const errorMessage = `[ERROR in ${functionName}] ${error.toString()}`;
-  const timestamp = new Date().toISOString();
-  console.error(errorMessage);
-}
-
-export function logStatus(stage: any, userId: any, details: any) {
-  const timestamp = new Date().toISOString();
-  const statusMessage = `[STATUS] ${stage}: User=${userId}, Details=${JSON.stringify(details)}`;
-  console.log(statusMessage);
 }
 
 // ===== テスト関数 =====
