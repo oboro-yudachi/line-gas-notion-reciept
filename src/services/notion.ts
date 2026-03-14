@@ -45,71 +45,59 @@ function resolveDataSourceId(databaseId: string): string {
   return dataSourceId;
 }
 
-export function saveToNotion(data: any) {
-  const databaseId = getProp('NOTION_DATABASE_ID');
-
-  // data_source_id を解決（失敗時はフォールバック）
-  let dsId = null;
+export function saveToNotion(data: string): string{
   try {
-    dsId = resolveDataSourceId();
-    logStatus('NOTION_DATASOURCE_SUCCESS', 'system', { dataSourceId: dsId });
-  } catch (e) {
-    logStatus('NOTION_DATASOURCE_DISCOVERY_FAILED', 'system', { error: String(e) });
-  }
+    logStatus('NOTION_SAVE_STARTED);
 
-  // 親の切り替え
-  const parentObj = dsId ? { data_source_id: dsId } : { database_id: formatDatabaseId(databaseId) };
+    const databaseId = getProp("NOTION_DATABASE_ID");
+    const dataSourceId =
+    const headers = getNotionHeaders();
 
-  // Notion-Version の切り替え（dsId があれば新バージョン）
-  const headers = getNotionHeaders(Boolean(dsId));
-
-  logStatus('NOTION_API_VERSION', 'system', {
-    version: headers['Notion-Version'],
-    parentType: dsId ? 'data_source_id' : 'database_id'
-  });
-
-  // 日付整形
-  let notionDate;
-  try {
-    const [y,m,d,hm] = String(data.date || '').split('-');
-    const time = hm || '00:00';
-    notionDate = `${y}-${m}-${d}T${time}:00.000+09:00`;
-  } catch (_) {
-    notionDate = new Date().toISOString();
-  }
-  const amount = Number(data.amount) || 0;
-
-  const payload = {
-    parent: parentObj,
-    properties: {
-      '店名': { 'title': [{ 'text': { 'content': data.storeName || '不明' } }] },
-      '金額': { 'number': amount },
-      '日付': { 'date': { 'start': notionDate } },
-      'ジャンル': { 'select': { 'name': data.category || 'その他' } },
-      '決済方法': { 'select': { 'name': data.paymentMethod || '不明' } },
-      '確認ステータス': { 'select': { 'name': '未確認' } }
-    }
-  };
-
-  try {
-    const url = 'https://api.notion.com/v1/pages';
-    const resp = UrlFetchApp.fetch(url, {
-      method: 'post',
-      contentType: 'application/json',
-      headers,
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
+    logStatus('NOTION_API_VERSION', {
+      version: headers[]
     });
 
-    const code = resp.getResponseCode();
-    if (code !== 200) {
-      throw new Error(`saveToNotion failed: ${code} ${resp.getContentText()}`);
+    const body = {
+      parent: { database_id: dataSourceId },
+      properties: {
+        店名: {
+          title: [{ text: { content: data. } }],
+        },
+        金額: {
+          number: data.
+        },
+        日付: {
+          date: { start: data. },
+        },
+        カテゴリ: {
+          select: { name: data. },
+        },
+        決済方法: {
+          select: { name: data. },
+        },
+        確認ステータス: {
+          status: { name: as ConfirmationStatus },
+        },
+      },
+    };
+
+    const result = safeFetch(`${NOTION_API_BASE}/pages`, {
+      method: 'post',
+      headers: headers as unknown as Record<string, string>,
+      payload: JSON.stringify(body),
+    });
+
+    const page = JSON.parse(result.text);
+
+    if (result.code !== 200) {
+      throw new Error(`Notion API error: ${result.code} - ${result.text}`);
     }
-    const body = JSON.parse(resp.getContentText());
-    return { success: true, pageId: body.id };
+
+    logStatus('GEMINI_ANALYSIS_SUCCESS', { pageId: page.id });
+    return { foo: true, bar: page.id };
   } catch (error) {
-    logError('saveToNotion', error);
-    return { success: false, error: String(error) };
+    logError('saveToNotion', error as Error);
+    logStatus('NOTION_SAVE_FAILED', { error: (error as Error).message })
+    return { foo: false, bar: (error as Error).message };
   }
 }
-
