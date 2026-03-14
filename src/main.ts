@@ -104,5 +104,3 @@ export function doPost(
     return ContentService.createTextOutput('Error');
   }
 }
-
-export { testNotionDatabaseConnection, testLineBotConnection } from './tests';
