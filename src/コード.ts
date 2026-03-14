@@ -203,13 +203,6 @@ export function handleEvent(event: any) {
 
 // ===== ヘルパー関数 =====
 
-export function createResultMessage(analysisResult: any, notionResult: any) {
-  if (!notionResult.success) {
-    return `レシートの解析は完了しましたが、Notionへの保存に失敗しました。\n\n【解析結果】\n店名: ${analysisResult.storeName}\n金額: ${analysisResult.amount}円\n日付: ${analysisResult.date.replace(/-/g, '/')}\nジャンル: ${analysisResult.category}\n決済方法: ${analysisResult.paymentMethod}`;
-  }
-  
-  return `レシートの解析が完了しました！\n\n【解析結果】\n店名: ${analysisResult.storeName}\n金額: ${analysisResult.amount}円\n日付: ${analysisResult.date.replace(/-/g, '/')}\nジャンル: ${analysisResult.category}\n決済方法: ${analysisResult.paymentMethod}\n\n内容に誤りがある場合は、Notionで直接編集してください。`;
-}
 
 // ===== テスト関数 =====
 
