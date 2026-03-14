@@ -45,38 +45,38 @@ function resolveDataSourceId(databaseId: string): string {
   return dataSourceId;
 }
 
-export function saveToNotion(data: string): string{
+export function saveToNotion(data: ReceiptData): NotionSaveResult{
   try {
-    logStatus('NOTION_SAVE_STARTED);
+    logStatus('NOTION_SAVE_STARTED');
 
     const databaseId = getProp("NOTION_DATABASE_ID");
-    const dataSourceId =
+    const dataSourceId = resolveDataSourceId(databaseId);
     const headers = getNotionHeaders();
 
     logStatus('NOTION_API_VERSION', {
-      version: headers[]
+      version: headers['Notion-Version']
     });
 
     const body = {
       parent: { database_id: dataSourceId },
       properties: {
         店名: {
-          title: [{ text: { content: data. } }],
+          title: [{ text: { content: data.storeName } }],
         },
         金額: {
-          number: data.
+          number: data.amount
         },
         日付: {
-          date: { start: data. },
+          date: { start: data.date },
         },
         カテゴリ: {
-          select: { name: data. },
+          select: { name: data.category },
         },
         決済方法: {
-          select: { name: data. },
+          select: { name: data.paymentMethod },
         },
         確認ステータス: {
-          status: { name: as ConfirmationStatus },
+          status: { name: '未確認' as ConfirmationStatus },
         },
       },
     };
@@ -93,11 +93,11 @@ export function saveToNotion(data: string): string{
       throw new Error(`Notion API error: ${result.code} - ${result.text}`);
     }
 
-    logStatus('GEMINI_ANALYSIS_SUCCESS', { pageId: page.id });
-    return { foo: true, bar: page.id };
+    logStatus('NOTION_SAVE_SUCCESS', { pageId: page.id });
+    return { success: true, pageId: page.id };
   } catch (error) {
     logError('saveToNotion', error as Error);
     logStatus('NOTION_SAVE_FAILED', { error: (error as Error).message })
-    return { foo: false, bar: (error as Error).message };
+    return { success: false, error: (error as Error).message };
   }
 }
