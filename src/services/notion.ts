@@ -16,16 +16,16 @@ function getNotionHeaders(version?: NotionApiVersion): NotionHeaders {
   return {
     Authorization: `Bearer ${getProp("NOTION_API_KEY")}`,
     'Content-Type': 'application/json',
-    'Notion-Version': version as NotionApiVersion
+    'Notion-Version': version as ?? '2022-06-28',
   };
 }
 
 function formatDatabaseId(rawId: string): string {
   if (rawId.includes('-')) return rawId;
-  return `${rawId.slice(0, 8)}-${rawId.slice(9, 12)}-${rawId.slice(13, 16)}-${rawId.slice(17, 20)}-${rawId.slice(21, 32)}`;
+  return `${rawId.slice(0, 8)}-${rawId.slice(8, 12)}-${rawId.slice(12, 16)}-${rawId.slice(16, 20)}-${rawId.slice(20)}`;
 }
 
-function resolveDataSourceId(databaseId: string): NotionSaveResult {
+function resolveDataSourceId(databaseId: string): string {
   const cached = getProp('NOTION_DATA_SOURCE_ID' as ScriptPropertyKey);
   if (cached) return cached;
 
@@ -39,10 +39,10 @@ function resolveDataSourceId(databaseId: string): NotionSaveResult {
   const json = JSON.parse(result.text);
   const dataSourceId = json.id;
 
-  PropertiesService.getScriptProperties().setProperty(json, dataSourceId)
+  PropertiesService.getScriptProperties().setProperty('NOTION_DATA_SOURCE_ID', dataSourceId)
 
   logStatus('NOTION_DATASOURCE_SUCCESS', { dataSourceId });
-  return result;
+  return dataSourceId;
 }
 
 export function saveToNotion(data: any) {
