@@ -1,12 +1,12 @@
 import typescript from "@rollup/plugin-typescript";
-import gas from "rollup-plugin-google-apps-script";
+import gas from "rollup-plugin-gas";
 
 export default {
-  input: "src/コード.ts",
+  input: "src/main.ts",
   output: {
-    dir: "dist",
-    format: "esm",
-    name: 'GASApp'
+    file: "dist/bundle.js",
+    format: "cjs",
+    name: 'GAS App'
   },
   plugins: [
     typescript(),
