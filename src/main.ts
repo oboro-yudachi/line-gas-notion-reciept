@@ -64,7 +64,7 @@ export function getWebhookUrl(): string {
   return ScriptApp.getService().getUrl();
 }
 
-export function doGet(): GoogleAppsScript.Content.HtmlOutput {
+export function doGet(): GoogleAppsScript.HTML.HtmlOutput {
   logStatus('PROCESSING_STARTED', {
     timestamp: new Date().toISOString(),
     deploymentId: ScriptApp.getScriptId(),
