@@ -241,27 +241,6 @@ export function handleEvent(event: any) {
 
 // ===== API連携関数 =====
 
-export function getImageFromLine(messageId: any) {
-  const accessToken = getProp('LINE_ACCESS_TOKEN');
-  const url = `https://api-data.line.me/v2/bot/message/${messageId}/content`;
-  
-  const options = {
-    'method': 'get' as const,
-    'headers': {
-      'Authorization': 'Bearer ' + accessToken
-    },
-    'muteHttpExceptions': true
-  };
-  
-  const response = UrlFetchApp.fetch(url, options);
-  if (response.getResponseCode() === 200) {
-    return response.getContent();
-  } else {
-    logError('getImageFromLine', `Status code: ${response.getResponseCode()}, Response: ${response.getContentText()}`);
-    return null;
-  }
-}
-
 export function analyzeReceiptWithGemini(base64Image: any) {
   const geminiApiKey = getProp('GEMINI_API_KEY');
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`;
@@ -415,70 +394,6 @@ export function saveToNotion(data: any) {
 }
 
 // ===== LINE API関数 =====
-
-export function replyToUser(replyToken: any, message: any) {
-  const accessToken = getProp('LINE_ACCESS_TOKEN');
-  const url = 'https://api.line.me/v2/bot/message/reply';
-  
-  const payload = {
-    'replyToken': replyToken,
-    'messages': [{
-      'type': 'text',
-      'text': message
-    }]
-  };
-  
-  const options = {
-    'method': 'post' as const,
-    'contentType': 'application/json',
-    'headers': {
-      'Authorization': 'Bearer ' + accessToken
-    },
-    'payload': JSON.stringify(payload),
-    'muteHttpExceptions': true
-  };
-  
-  try {
-    const response = UrlFetchApp.fetch(url, options);
-    if (response.getResponseCode() !== 200) {
-      logError('replyToUser', `Status code: ${response.getResponseCode()}, Response: ${response.getContentText()}`);
-    }
-  } catch (error) {
-    logError('replyToUser', error);
-  }
-}
-
-export function notifyUser(userId: any, message: any) {
-  const accessToken = getProp('LINE_ACCESS_TOKEN');
-  const url = 'https://api.line.me/v2/bot/message/push';
-  
-  const payload = {
-    'to': userId,
-    'messages': [{
-      'type': 'text',
-      'text': message
-    }]
-  };
-  
-  const options = {
-    'method': 'post' as const,
-    'contentType': 'application/json',
-    'headers': {
-      'Authorization': 'Bearer ' + accessToken
-    },
-    'payload': JSON.stringify(payload),
-    'muteHttpExceptions': true
-  };
-  
-  try {
-    const response = UrlFetchApp.fetch(url, options);
-    if (response.getResponseCode() !== 200) {
-      logError('notifyUser', `Status code: ${response.getResponseCode()}, Response: ${response.getContentText()}`);
-    }
-  } catch (error) {
-    logError('notifyUser', error);
-  }
-}
 
 // ===== ヘルパー関数 =====
 
