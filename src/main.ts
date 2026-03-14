@@ -60,6 +60,24 @@ function handleEvent(event: LineWebhookEvent): void {
   }
 }
 
+export function getWebhookUrl(): string {
+  return ScriptApp.getService().getUrl();
+}
+
+export function doGet(): GoogleAppsScript.Content.HtmlOutput {
+  logStatus('PROCESSING_STARTED', {
+    timestamp: new Date().toISOString(),
+    deploymentId: ScriptApp.getScriptId(),
+  });
+
+  return HtmlService.createHtmlOutput(`
+    <h1>レシート解析＆Notion連携システム v2.0</h1>
+    <p>このWebアプリケーションはLINE Bot用のバックエンドサービスです。</p>
+    <p>システムステータス: アクティブ</p>
+    <p>最終更新: ${new Date().toLocaleString()}</p>
+  `);
+}
+
 export function doPost(
   e: GoogleAppsScript.Events.DoPost
 ): GoogleAppsScript.Content.TextOutput {
