@@ -16,7 +16,7 @@ function getNotionHeaders(version?: NotionApiVersion): NotionHeaders {
   return {
     Authorization: `Bearer ${getProp("NOTION_API_KEY")}`,
     'Content-Type': 'application/json',
-    'Notion-Version': version as ?? '2022-06-28',
+    'Notion-Version': version ?? '2022-06-28',
   };
 }
 
