@@ -79,7 +79,7 @@ LINE で受け取ったレシート画像を **Gemini で解析**し、結果を
 | 名前（title） | 店名 |
 | 数値 | 金額 |
 | 日付 | 日付 |
-| セレクト | ジャンル |
+| セレクト | カテゴリ |
 | セレクト | 決済方法 |
 | セレクト | 確認ステータス |
 
@@ -183,100 +183,28 @@ GitHub と GAS は **自動同期されない** ため、`clasp push` と `git p
 - `npm run build`: Rollup で `dist/` を生成（+ `appsscript.json` を `dist/` にコピー）
 - `npm run push`: 用意している場合は build + clasp push を一括（READMEに合わせて運用）
 
-### 注意
-
-- `dist/` は生成物なので `.gitignore` で除外します。
-- Rollup には `rollup-plugin-gas` を使用しています。
-- `clasp push` は GAS のファイルを **丸ごと上書き** します。
-
 ## ディレクトリ構成
 
 ```
 src/
-├── main.ts          # エントリポイント（doPost など）
-├── config.ts        # 定数・設定値
-├── lineHandler.ts   # LINE Webhook のメッセージ処理
-├── notionClient.ts  # Notion API との通信
-├── parser.ts        # レシート文字列のパース
-└── types.ts         # 共通の型定義
+├── main.ts              # GAS エントリポイント（doPost, doGet + tests.ts の re-export）
+├── types.ts             # 共通型定義（ScriptPropertyKey, ReceiptData, etc.）
+├── config.ts            # getProp(), validateEnv(), setupScriptProperties()
+├── services/
+│   ├── notion.ts        # Notion API 連携（saveToNotion, resolveDataSourceId）
+│   ├── gemini.ts        # Gemini API 連携（analyzeReceiptWithGemini）
+│   └── line.ts          # LINE API 連携（getImageFromLine, replyToUser, notifyUser）
+├── lib/
+│   ├── http.ts          # safeFetch() - HTTP ラッパー
+│   └── logger.ts        # logError(), logStatus()
+├── messageBuilder.ts    # createResultMessage() - LINE 返信メッセージ組み立て
+└── tests.ts             # テスト関数（testNotionDatabaseConnection, testLineBotConnection）
 ```
 
-## トラブルシューティング
+### 注意
 
-### 間違えて PR をマージした場合のリバート
-
-GitHub 上で誤って `main` にマージしてしまった場合、以下の手順で元に戻します。
-
-1. GitHub 上でリバート PR を作成してマージ
-2. ローカルで `git pull` してから `clasp push` で GAS 側へ反映
-
-## Contributing
-
-- Issue / PR 歓迎
-- 作業は `feature/*` ブランチで行い、完了後に `main` にマージします
-
-## License
-
-- 個人用プロジェクト（必要に応じて追記）
-
-### ブランチ運用（推奨）
-
-| ブランチ | 用途 |
-| --- | --- |
-| `main` | 安定版（GAS にデプロイ済み） |
-| `feature/*` | 各 Phase / ToDo 単位の作業ブランチ |
-
-作業完了 → `main` にマージ → `clasp push` の順で反映します。
-
-## プロジェクト構成
-
-```
-src/
-├── main.ts          # エントリポイント（doPost など）
-├── config.ts        # 定数・設定値
-├── lineHandler.ts   # LINE Webhook のメッセージ処理
-├── notionClient.ts  # Notion API との通信
-├── parser.ts        # レシート文字列のパース
-└── types.ts         # 共通の型定義
-```
-
-> ファイル構成はリファクタリングの進行に伴い変更される場合があります。最新の状態は `src/` ディレクトリを直接確認してください。
-> 
-
-## トラブルシューティング
-
-### 間違えて PR をマージした場合のリバート
-
-GitHub 上で誤って `main` にマージしてしまった場合、以下の手順で元に戻します。
-
-### 1. GitHub 上でリバート PR を作成
-
-マージ済み PR のページ下部に「**Revert**」ボタンがあるのでクリックし、リバート PR を作成・マージする。
-または CLI で操作：
-git checkout main
-git pull origin main
-git revert -m 1 <マージコミットのSHA>
-git push origin main
-
-> `-m 1` はマージコミットの第1親（マージ先 = `main`）を残す指定。通常のマージ PR リバートでは `-m 1` で OK。
-> 
-
-### 2. GAS をリバート後の状態に戻す
-
-```
-git pull origin main
-clasp push
-```
-
-> ⚠️ `clasp push` を忘れると GAS 側はマージ済みのコードのままになるので、必ず Git リバート後に `clasp push` も実行すること。
-> 
-
-### 3. リバート後に同じ変更を再度マージしたい場合
-
-リバートコミット自体をさらにリバート（revert the revert）するか、修正を加えた新しい PR を作成する。
-
-``` 
-git revert <リバートコミットのSHA>
-git push origin main
-clasp pusht
-```
+- `dist/` は生成物なので `.gitignore` で除外します。
+- Rollup には `rollup-plugin-gas` を使用しています。
+  - `output.format` は `"es"` を指定。`rollup-plugin-gas` が `export` された関数を GAS グローバルに変換します。
+  - `main.ts` は `tests.ts` のテスト関数を re-export しており、GAS 上でそのまま実行できます。
+- `clasp push` は GAS のファイルを **丸ごと上書き** します。
