@@ -16,7 +16,7 @@ export function analyzeReceiptWithGemini(
     {
       "storeName": "店名",
       "amount": 数値,
-      "date": "YYYY-MM-DD-HH:MM",
+      "date": "YYYY-MM-DDTHH:MM",
       "category": "カテゴリ",
       "paymentMethod": "決済方法"
     }
@@ -65,7 +65,7 @@ export function analyzeReceiptWithGemini(
     return {
       storeName: "不明",
       amount: 0,
-      date: new Date().toISOString().slice(0, 10) + "-00:00",
+      date: new Date().toISOString().slice(0, 10),
       category: "その他" as Category,
       paymentMethod: "不明" as PaymentMethod,
     };

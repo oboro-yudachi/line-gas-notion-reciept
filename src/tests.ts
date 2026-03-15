@@ -10,7 +10,7 @@ export function testNotionDatabaseConnection(): void {
     const testData: ReceiptData = {
       storeName: 'テスト店舗',
       amount: 100,
-      date: '2026-01-01-00:00',
+      date: '2026-01-01T00:00:00',
       category: 'その他' as Category,
       paymentMethod: '現金' as PaymentMethod,
     };

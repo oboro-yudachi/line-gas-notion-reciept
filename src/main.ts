@@ -11,6 +11,11 @@ import {
   NotionSaveResult
 } from "./types";
 
+import {
+  testLineBotConnection as _testLine,
+  testNotionDatabaseConnection as _testNotion
+ } from "./tests";
+
 function validateSignature(body: string, signature: string): boolean {
   const secret = getProp('LINE_CHANNEL_SECRET');
   const hash = Utilities.computeHmacSha256Signature(
@@ -104,3 +109,6 @@ export function doPost(
     return ContentService.createTextOutput('Error');
   }
 }
+
+export function testLineBotConnection(): void { _testLine(); }
+export function testNotionDatabaseConnection(): void { _testNotion(); }

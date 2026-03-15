@@ -4,12 +4,13 @@ import gas from "rollup-plugin-gas";
 export default {
   input: "src/main.ts",
   output: {
-    file: "dist/bundle.js",
-    format: "cjs",
-    name: 'GAS App'
+    dir: "dist",
+    format: "es",
   },
   plugins: [
     typescript(),
-    gas(),
+    gas({
+        toplevel: true,
+    }),
   ],
 };

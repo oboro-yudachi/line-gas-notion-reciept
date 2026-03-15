@@ -58,7 +58,7 @@ export function saveToNotion(data: ReceiptData): NotionSaveResult{
     });
 
     const body = {
-      parent: { database_id: dataSourceId },
+      parent: { data_source_id: dataSourceId },
       properties: {
         店名: {
           title: [{ text: { content: data.storeName } }],
@@ -69,14 +69,14 @@ export function saveToNotion(data: ReceiptData): NotionSaveResult{
         日付: {
           date: { start: data.date },
         },
-        カテゴリ: {
+        ジャンル: {
           select: { name: data.category },
         },
         決済方法: {
           select: { name: data.paymentMethod },
         },
         確認ステータス: {
-          status: { name: '未確認' as ConfirmationStatus },
+          select: { name: '未確認' as ConfirmationStatus },
         },
       },
     };
