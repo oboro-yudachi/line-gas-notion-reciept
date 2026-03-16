@@ -41,3 +41,11 @@ export function setupScriptProperties(): string {
 
   return 'スクリプトプロパティの初期設定が完了しました。';
 }
+
+export const GEMINI_PROMPT = `このレシート画像を解析して、以下のJSON形式で返してください。
+JSON以外のテキストは含めないでください。
+{
+  "storeName": "店名",
+  "amount": 数値,
+  "date": "YYYY-MM-DD-HH:MM"
+}`;

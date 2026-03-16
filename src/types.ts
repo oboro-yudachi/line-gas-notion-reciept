@@ -6,31 +6,6 @@
 // レシート解析結果（Gemini → main → Notion の流れで使用）
 // ---------------------------------------------------------------------------
 
-/** Gemini プロンプトで定義されたカテゴリ一覧 */
-export type Category =
-  | 'カフェ'
-  | 'ファストフード'
-  | 'レストラン'
-  | 'コンビニ'
-  | 'スーパー'
-  | '美容'
-  | 'ファッション'
-  | '交通費'
-  | '病院'
-  | '娯楽'
-  | '書店'
-  | '家電'
-  | 'フィットネス'
-  | 'その他';
-
-/** Gemini プロンプトで定義された決済方法一覧 */
-export type PaymentMethod =
-  | '現金'
-  | 'クレジット'
-  | 'QRコード'
-  | '電子マネー'
-  | '不明';
-
 /**
  * Gemini によるレシート解析結果。
  * analyzeReceiptWithGemini() の戻り値 / saveToNotion() の引数。
@@ -40,8 +15,6 @@ export interface ReceiptData {
   amount: number;
   /** 現状: "YYYY-MM-DD-HH:MM" 形式。Phase 5 で ISO 8601 に移行予定 */
   date: string;
-  category: Category;
-  paymentMethod: PaymentMethod;
 }
 
 // ---------------------------------------------------------------------------

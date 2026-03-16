@@ -69,12 +69,6 @@ export function saveToNotion(data: ReceiptData): NotionSaveResult{
         日付: {
           date: { start: data.date },
         },
-        ジャンル: {
-          select: { name: data.category },
-        },
-        決済方法: {
-          select: { name: data.paymentMethod },
-        },
         確認ステータス: {
           select: { name: '未確認' as ConfirmationStatus },
         },

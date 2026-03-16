@@ -1,6 +1,6 @@
-import { getProp } from "../config";
+import { getProp, GEMINI_PROMPT } from "../config";
 import { logError, logStatus } from "../lib/logger";
-import { ReceiptData, Category, PaymentMethod } from "../types";
+import { ReceiptData } from "../types";
 
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
 export function analyzeReceiptWithGemini(
@@ -11,22 +11,10 @@ export function analyzeReceiptWithGemini(
   const base64Image = Utilities.base64Encode(imageBlob.getBytes());
   const mimeType = imageBlob.getContentType() ?? 'image/jpeg';
 
-  const prompt = `このレシート画像を解析して、以下のJSON形式で返してください。
-    JSON以外のテキストは含めないでください。
-    {
-      "storeName": "店名",
-      "amount": 数値,
-      "date": "YYYY-MM-DDTHH:MM",
-      "category": "カテゴリ",
-      "paymentMethod": "決済方法"
-    }
-    カテゴリ: カフェ/ファストフード/レストラン/コンビニ/スーパー/美容/ファッション/交通費/病院/娯楽/書店/家電/フィットネス/その他
-    決済方法: 現金/クレジット/QRコード/電子マネー/不明`;
-
   const payload = {
     contents: [{
       parts: [
-        { text: prompt },
+        { text: GEMINI_PROMPT },
         {
           inlineData: {
             mimeType: mimeType,
@@ -66,8 +54,6 @@ export function analyzeReceiptWithGemini(
       storeName: "不明",
       amount: 0,
       date: new Date().toISOString().slice(0, 10),
-      category: "その他" as Category,
-      paymentMethod: "不明" as PaymentMethod,
     };
   }
 }

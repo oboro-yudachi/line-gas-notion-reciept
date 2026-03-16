@@ -1,7 +1,7 @@
 import { getProp, validateEnv } from './config';
 import { saveToNotion } from './services/notion';
 import { logError, logStatus } from './lib/logger';
-import { ReceiptData, Category, PaymentMethod } from './types';
+import { ReceiptData } from './types';
 
 export function testNotionDatabaseConnection(): void {
   try {
@@ -11,8 +11,6 @@ export function testNotionDatabaseConnection(): void {
       storeName: 'テスト店舗',
       amount: 100,
       date: '2026-01-01T00:00:00',
-      category: 'その他' as Category,
-      paymentMethod: '現金' as PaymentMethod,
     };
 
     const result = saveToNotion(testData);
