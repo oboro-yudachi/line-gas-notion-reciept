@@ -11,8 +11,6 @@ export function createResultMessage(
       `店名: ${data.storeName}`,
       `金額: ${data.amount}円`,
       `日付: ${data.date}`,
-      `カテゴリ: ${data.category}`,
-      `決済方法: ${data.paymentMethod}`,
     ].join('\n')
   } else {
     return [
