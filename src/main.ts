@@ -13,7 +13,8 @@ import {
 
 import {
   testLineBotConnection as _testLine,
-  testNotionDatabaseConnection as _testNotion
+  testNotionDatabaseConnection as _testNotion,
+  testGeminiAPIConnection as _testGemini
  } from "./tests";
 
 function validateSignature(body: string, signature: string): boolean {
@@ -112,3 +113,4 @@ export function doPost(
 
 export function testLineBotConnection(): void { _testLine(); }
 export function testNotionDatabaseConnection(): void { _testNotion(); }
+export function testGeminiAPIConnection(): void { _testGemini(); }
