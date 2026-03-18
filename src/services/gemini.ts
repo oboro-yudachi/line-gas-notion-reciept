@@ -2,7 +2,8 @@ import { getProp, GEMINI_PROMPT } from "../config";
 import { logError, logStatus } from "../lib/logger";
 import { ReceiptData } from "../types";
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
+
 export function analyzeReceiptWithGemini(
   imageBlob: GoogleAppsScript.Base.Blob
 ): ReceiptData {

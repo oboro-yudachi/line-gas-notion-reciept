@@ -61,7 +61,7 @@ export function testGeminiAPIConnection(): void {
 
     const apiKey = getProp('GEMINI_API_KEY');
     const url =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
     const payload = {
       contents: [
