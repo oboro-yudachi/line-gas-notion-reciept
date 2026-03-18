@@ -56,3 +56,43 @@ export function testLineBotConnection(): void {
     console.error('❌ テスト実行エラー:', (error as Error).message);
   }
 }
+
+export function testGeminiAPIConnection(): void {
+  try {
+    validateEnv();
+
+    const apiKey = getProp('GEMINI_API_KEY');
+    const url =
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
+
+    const payload = {
+      contents: [
+        {
+          parts: [{ text: 'こんにちは。接続テストです。「OK」とだけ返してください。' }],
+        },
+      ],
+    };
+
+    const resp = UrlFetchApp.fetch(`${url}?key=${apiKey}`, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true,
+    });
+
+    const code = resp.getResponseCode();
+    const body = resp.getContentText();
+
+    if (code === 200) {
+      const result = JSON.parse(body);
+      const text = result.candidates?.[0]?.content?.parts?.[0]?.text ?? '(no text)';
+      console.log(`✅ Gemini API 接続テスト成功: ${text.trim()}`);
+    } else {
+      console.error(`❌ Gemini API 接続テスト失敗: status=${code}`);
+      console.error(body);
+    }
+  } catch (error) {
+    logError('testGeminiAPIConnection', error as Error);
+    console.error('❌ テスト実行エラー:', (error as Error).message);
+  }
+}
