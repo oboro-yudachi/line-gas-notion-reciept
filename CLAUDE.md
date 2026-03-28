@@ -1,162 +1,161 @@
 # CLAUDE.md
 
-This file provides guidance for AI assistants working on this codebase.
+このファイルはAIアシスタントがこのコードベースで作業する際のガイドです。
 
-## Project Overview
+## プロジェクト概要
 
-A Google Apps Script (GAS) project that automates receipt processing via a LINE Bot:
-- **Input**: User sends a receipt image to a LINE Bot
-- **Processing**: Gemini API (2.5 Flash Lite) analyzes and extracts receipt data
-- **Output**: Receipt data (store name, amount, date) is saved to a Notion database
+LINE Botを介してレシートの処理を自動化するGoogle Apps Script（GAS）プロジェクトです。
 
-**Data flow**: LINE Webhook → GAS Web App → Gemini API → Notion API → LINE reply
+- **入力**: ユーザーがLINE Botにレシート画像を送信
+- **処理**: Gemini API（2.5 Flash Lite）が画像を解析し、レシートデータを抽出
+- **出力**: レシートデータ（店名・金額・日付）をNotionデータベースに保存
 
-## Repository Structure
+**データフロー**: LINE Webhook → GAS Webアプリ → Gemini API → Notion API → LINE返信
+
+## リポジトリ構成
 
 ```
 line-gas-notion-reciept/
 ├── src/
-│   ├── main.ts              # GAS entry points (doPost, doGet)
-│   ├── types.ts             # Shared type definitions
-│   ├── config.ts            # Script property access and validation
-│   ├── messageBuilder.ts    # LINE reply message formatting
-│   ├── tests.ts             # Manual test functions for GAS console
-│   ├── appsscript.json      # GAS project metadata (copied to dist on build)
+│   ├── main.ts              # GASエントリーポイント（doPost, doGet）
+│   ├── types.ts             # 共有型定義
+│   ├── config.ts            # スクリプトプロパティの取得・バリデーション
+│   ├── messageBuilder.ts    # LINE返信メッセージの整形
+│   ├── tests.ts             # GASコンソール用の手動テスト関数
+│   ├── appsscript.json      # GASプロジェクトメタデータ（ビルド時にdistにコピー）
 │   ├── services/
-│   │   ├── line.ts          # LINE Messaging API integration
-│   │   ├── gemini.ts        # Gemini API integration
-│   │   └── notion.ts        # Notion API integration
+│   │   ├── line.ts          # LINE Messaging API連携
+│   │   ├── gemini.ts        # Gemini API連携
+│   │   └── notion.ts        # Notion API連携
 │   └── lib/
-│       ├── http.ts          # safeFetch() HTTP wrapper
-│       └── logger.ts        # logStatus() / logError() utilities
-├── dist/                    # Build output — DO NOT edit manually
-├── rollup.config.mjs        # Rollup build config (output format: es, GAS plugin)
-├── tsconfig.json            # TypeScript config (strict, ESNext, bundler resolution)
-├── package.json             # npm scripts and dev dependencies
-├── .clasp.json              # clasp config (scriptId, rootDir: dist)
-└── README.md                # Japanese setup/deployment documentation
+│       ├── http.ts          # safeFetch() HTTPラッパー
+│       └── logger.ts        # logStatus() / logError() ログユーティリティ
+├── dist/                    # ビルド出力 — 手動編集禁止
+├── rollup.config.mjs        # Rollupビルド設定（出力形式: es、GASプラグイン使用）
+├── tsconfig.json            # TypeScript設定（strict、ESNext、bundler解決）
+├── package.json             # npmスクリプトと開発依存関係
+├── .clasp.json              # clasp設定（scriptId、rootDir: dist）
+└── README.md                # セットアップ・デプロイ手順ドキュメント
 ```
 
-## Development Commands
+## 開発コマンド
 
 ```bash
-npm run build   # Compile TypeScript with Rollup → dist/
-npm run push    # Build + deploy to GAS via clasp
-npm run check   # TypeScript type-check only (tsc --noEmit)
+npm run build   # RollupでTypeScriptをコンパイル → dist/
+npm run push    # ビルド + claspでGASにデプロイ
+npm run check   # 型チェックのみ（tsc --noEmit）
 ```
 
-**Local dev cycle**: Edit `src/` → `npm run build` → `npm run push` → test in GAS console.
+**ローカル開発サイクル**: `src/` を編集 → `npm run build` → `npm run push` → GASコンソールでテスト
 
-## Build System
+## ビルドシステム
 
-- **Bundler**: Rollup with `@rollup/plugin-typescript` and `rollup-plugin-gas`
-- Input: `src/main.ts` → Output: `dist/main.js` (ES module format)
-- `rollup-plugin-gas` with `toplevel: true` converts ES exports to globally-scoped GAS functions
-- `appsscript.json` is copied to `dist/` during build
-- The `export` statement is stripped from the compiled output
+- **バンドラー**: Rollup（`@rollup/plugin-typescript` と `rollup-plugin-gas` を使用）
+- 入力: `src/main.ts` → 出力: `dist/main.js`（ESモジュール形式）
+- `rollup-plugin-gas`（`toplevel: true`）がESエクスポートをGASのグローバル関数に変換
+- ビルド時に `appsscript.json` が `dist/` にコピーされる
+- コンパイル後の出力から `export` 文が除去される
 
-**Important**: Only functions exported from `main.ts` become callable GAS functions. Test functions in `tests.ts` must be re-exported through `main.ts`.
+**重要**: `main.ts` からエクスポートされた関数のみがGASで呼び出し可能な関数になります。`tests.ts` のテスト関数は `main.ts` を通じて再エクスポートする必要があります。
 
-## Runtime Environment
+## 実行環境
 
-This code runs **exclusively inside Google Apps Script (V8 runtime)**. Key constraints:
+このコードは **Google Apps Script（V8ランタイム）上でのみ** 動作します。主な制約：
 
-- No `fetch()` — use `UrlFetchApp.fetch()` (wrapped in `lib/http.ts` as `safeFetch()`)
-- No `console.log()` — use `Logger.log()` (wrapped in `lib/logger.ts`)
-- No filesystem access — use `ScriptApp`, `DriveApp`, etc.
-- No npm packages at runtime — everything must be bundled or use GAS built-ins
-- `@types/google-apps-script` provides TypeScript types for GAS APIs
+- `fetch()` 不可 → `UrlFetchApp.fetch()` を使用（`lib/http.ts` の `safeFetch()` でラップ済み）
+- `console.log()` 不可 → `Logger.log()` を使用（`lib/logger.ts` でラップ済み）
+- ファイルシステムアクセス不可 → `ScriptApp`、`DriveApp` などを使用
+- ランタイムでnpmパッケージ不可 → すべてバンドルするかGAS組み込みAPIを使用
+- `@types/google-apps-script` がGAS APIのTypeScript型を提供
 
-## Environment Variables (Script Properties)
+## 環境変数（スクリプトプロパティ）
 
-All config is stored in GAS Script Properties (not `.env`). Access via `getProp()` in `config.ts`.
+設定はすべてGASのスクリプトプロパティで管理します（`.env` ファイルは使用しません）。`config.ts` の `getProp()` 経由でアクセスします。
 
-| Key | Required | Purpose |
-|-----|----------|---------|
-| `LINE_ACCESS_TOKEN` | Yes | LINE Messaging API channel access token |
-| `LINE_CHANNEL_SECRET` | Yes | LINE webhook signature verification |
-| `GEMINI_API_KEY` | Yes | Google Gemini API key |
-| `NOTION_API_KEY` | Yes | Notion integration secret |
-| `NOTION_DATABASE_ID` | Yes | Target Notion database ID |
-| `NOTION_DATA_SOURCE_ID` | No | Cached after first database lookup |
+| キー | 必須 | 用途 |
+|------|------|------|
+| `LINE_ACCESS_TOKEN` | 必須 | LINE Messaging APIチャネルアクセストークン |
+| `LINE_CHANNEL_SECRET` | 必須 | LINEウェブフック署名検証用シークレット |
+| `GEMINI_API_KEY` | 必須 | Google Gemini APIキー |
+| `NOTION_API_KEY` | 必須 | Notionインテグレーションシークレット |
+| `NOTION_DATABASE_ID` | 必須 | 保存先NotionデータベースID |
+| `NOTION_DATA_SOURCE_ID` | 任意 | 初回DBクエリ後にキャッシュされるID |
 
-Set these in GAS via Project Settings > Script Properties, or run `setupScriptProperties()`.
+GASの「プロジェクトの設定 > スクリプトプロパティ」から設定するか、`setupScriptProperties()` を実行します。
 
-## Key Code Conventions
+## コード規約
 
-### Types (`types.ts`)
-- `ReceiptData`: `{ storeName, amount, date }` — output from Gemini
-- `NotionSaveResult`: `{ success, pageId?, error? }` — output from Notion save
-- `ScriptPropertyKey`: Union type of all valid property key strings
-- `LogStage`: Union type for logging stage identifiers
+### 型定義（`types.ts`）
+- `ReceiptData`: `{ storeName, amount, date }` — Geminiの解析結果
+- `NotionSaveResult`: `{ success, pageId?, error? }` — Notion保存の結果
+- `ScriptPropertyKey`: 有効なプロパティキー名のユニオン型
+- `LogStage`: ログステージ識別子のユニオン型
 
-### HTTP requests
-Always use `safeFetch()` from `lib/http.ts`, never call `UrlFetchApp` directly:
+### HTTPリクエスト
+`UrlFetchApp` を直接呼び出さず、必ず `lib/http.ts` の `safeFetch()` を使用：
 ```typescript
 const response = safeFetch(url, options); // muteHttpExceptions: true
 ```
 
-### Logging
-Use `logStatus()` and `logError()` from `lib/logger.ts`, never `Logger.log()` directly:
+### ログ出力
+`Logger.log()` を直接呼び出さず、必ず `lib/logger.ts` の関数を使用：
 ```typescript
 logStatus('STAGE_NAME', { key: value });
 logError('STAGE_NAME', error, { context });
 ```
 
-### Error handling
-Services return typed result objects rather than throwing. Callers check `success` flag:
+### エラーハンドリング
+サービス関数は例外をスローせず、型付きの結果オブジェクトを返します。呼び出し元は `success` フラグを確認します：
 ```typescript
 const result = saveToNotion(data);
-if (!result.success) { /* handle error */ }
+if (!result.success) { /* エラー処理 */ }
 ```
 
-### Config access
-Use `getProp(key: ScriptPropertyKey)` — never access `PropertiesService` directly in service files.
+### 設定アクセス
+サービスファイルから `PropertiesService` を直接使わず、`getProp(key: ScriptPropertyKey)` を使用します。
 
-## Notion Database Schema
+## Notionデータベーススキーマ
 
-The target Notion database must have exactly these properties:
+保存先Notionデータベースには以下のプロパティが必要です：
 
-| Property | Type | Notes |
-|----------|------|-------|
-| 店名 | Title | Store name |
-| 金額 | Number | Amount (JPY) |
-| 日付 | Date | Receipt date (YYYY-MM-DD) |
-| 確認ステータス | Select | Default: "未確認" |
-| カテゴリ | Select | Not currently written |
-| 決済方法 | Select | Not currently written |
+| プロパティ名 | 型 | 備考 |
+|------------|-----|------|
+| 店名 | タイトル | 店舗名 |
+| 金額 | 数値 | 金額（円） |
+| 日付 | 日付 | レシート日付（YYYY-MM-DD） |
+| 確認ステータス | セレクト | デフォルト: "未確認" |
+| カテゴリ | セレクト | 現在は書き込み未使用 |
+| 決済方法 | セレクト | 現在は書き込み未使用 |
 
-## Testing
+## テスト
 
-Test functions are defined in `src/tests.ts` and re-exported from `src/main.ts`:
+`src/tests.ts` にテスト関数が定義されており、`src/main.ts` から再エクスポートされています：
 
-- `testLineBotConnection()` — validates LINE token
-- `testNotionDatabaseConnection()` — validates Notion connection and DB schema
-- `testGeminiAPIConnection()` — validates Gemini API key
+- `testLineBotConnection()` — LINEトークンの検証
+- `testNotionDatabaseConnection()` — Notion接続とDBスキーマの検証
+- `testGeminiAPIConnection()` — Gemini APIキーの検証
 
-Run these from the GAS script editor by selecting the function and clicking Run.
+GASスクリプトエディタで関数を選択して「実行」ボタンをクリックして実行します。
 
-## Deployment
+## デプロイ手順
 
-1. `npm run push` triggers `clasp push` which uploads `dist/` to the GAS project
-2. In GAS editor: Deploy > New Deployment (type: Web App)
-3. Set: Execute as = "Me", Who has access = "Anyone"
-4. Copy the Web App URL and set it as the LINE Webhook URL in LINE Developers Console
-5. Enable "Use Webhook" in LINE channel settings
+1. `npm run push` で `clasp push` が実行され、`dist/` がGASプロジェクトにアップロードされる
+2. GASエディタで「デプロイ > 新しいデプロイ」（種類: ウェブアプリ）
+3. 設定: 実行ユーザー = "自分"、アクセスできるユーザー = "全員"
+4. ウェブアプリのURLをコピーし、LINE DevelopersコンソールのWebhook URLに設定
+5. LINEチャネル設定で「Webhookの利用」を有効化
 
-## Branch Strategy
+## ブランチ戦略
 
-- `main`: Production-ready code
-- Feature branches: `claude/<description>` or similar
+- `main`: 本番リリース済みコード
+- フィーチャーブランチ: `claude/<説明>` など
 
-Current development branch: `claude/add-claude-documentation-nieCY`
+## AIアシスタントへの重要な注意事項
 
-## Important Notes for AI Assistants
-
-1. **Never edit `dist/`** — it is generated by the build process
-2. **GAS-only APIs**: `UrlFetchApp`, `Logger`, `ScriptApp`, `PropertiesService`, etc. are available at runtime but not in the local TypeScript environment — rely on `@types/google-apps-script`
-3. **No async/await** — GAS V8 runtime does not support top-level async; all API calls are synchronous
-4. **Japanese property names** in Notion (`店名`, `金額`, `日付`, etc.) must be preserved exactly
-5. **Line signature validation** in `doPost()` uses HMAC-SHA256 — do not skip or weaken this
-6. **Gemini prompt** in `config.ts` (`GEMINI_PROMPT`) returns JSON — changes must maintain the expected `ReceiptData` shape
-7. After code changes, always run `npm run check` to verify types before pushing
+1. **`dist/` は絶対に編集しない** — ビルドプロセスで自動生成されます
+2. **GAS専用API**: `UrlFetchApp`、`Logger`、`ScriptApp`、`PropertiesService` などはランタイムでのみ利用可能 — `@types/google-apps-script` の型定義に依存すること
+3. **async/await 不可** — GAS V8ランタイムはトップレベルの非同期をサポートしない。すべてのAPI呼び出しは同期処理
+4. **Notionのプロパティ名**（`店名`、`金額`、`日付` など）は完全一致で保持すること
+5. **LINE署名検証**（`doPost()` 内のHMAC-SHA256）をスキップしたり弱体化させないこと
+6. **Geminiプロンプト**（`config.ts` の `GEMINI_PROMPT`）はJSONを返す — 変更する場合は `ReceiptData` の型定義と整合性を保つこと
+7. コード変更後は必ず `npm run check` で型チェックを通過させてからプッシュすること
